@@ -1,16 +1,11 @@
 import sqlite3
 import os
-import numpy as np
-import pandas as pd
-from make_the_dataframes import make_the_dataframes
 
-# customer_clean_df, locations_clean_df, orders_clean_df, vendors_clean_df = make_the_dataframes() 
 DATABASE_NAME = 'delivery.db'
-
 
 sql_command_CREATE_CUSTOMERS = '''
 CREATE TABLE customers ( 
-    customer_id TEXT, 
+    customer_id TEXT NOT NULL, 
     gender TEXT, 
     status INTEGER, 
     verified  INTEGER, 
@@ -20,12 +15,46 @@ CREATE TABLE customers (
 
 sql_command_CREATE_LOCATIONS = '''
 CREATE TABLE locations (
-    customer_id TEXT,
-    location_number INTEGER,
+    customer_id TEXT NOT NULL,
+    location_number INTEGER NOT NULL,
     latitude REAL,
     longitude REAL,
     PRIMARY KEY (customer_id, location_number)
     FOREIGN KEY(customer_id) REFERENCES customers(customer_id)
+);'''
+
+sql_command_CREATE_VENDORS = '''
+CREATE TABLE vendors (
+    vendors_id INTEGER NOT NULL,
+    latitude REAL,
+    longitude REAL,
+    delivery_charge REAL,
+    serving_distance REAL,
+    rank REAL,
+    vendor_rating REAL,
+    vendor_tag_name TEXT,
+    opening_time TEXT,
+    closing_time TEXT,
+    PRIMARY KEY(vendors_id)
+);'''
+
+sql_command_CREATE_ORDERS = '''
+CREATE TABLE orders (
+    order_id REAL NOT NULL,
+    customer_id TEXT NOT NULL,
+    vendor_id INTEGER NOT NULL,
+    location_number INTEGER,
+    item_count REAL,
+    grand_total REAL,
+    payment_mode INTEGER,
+    vendor_discount_amount REAL,
+    deliverydistance REAL,
+    delivered_time TEXT, 
+    created_at TEXT,
+    PRIMARY KEY (order_id)
+    FOREIGN KEY(customer_id) REFERENCES customers(customer_id)
+    FOREIGN KEY(vendor_id) REFERENCES vendors(vendor_id)
+    FOREIGN KEY(location_number) REFERENCES locations(location_number)
 );'''
 
 def create_table(sql_command):
@@ -48,7 +77,7 @@ def show_all_tables():
     # close our connection
     conn.close()
 
-def show_table(table_name):
+def show_table_info(table_name):
     conn = sqlite3.connect(DATABASE_NAME)
     cursor = conn.cursor()
     cursor.execute(f''' PRAGMA table_info({table_name}) ''')
@@ -59,7 +88,17 @@ def show_table(table_name):
     # close our connection
     conn.close()
 
-#create_table(sql_command_CREATE_CUSTOMERS)
-#create_table(sql_command_CREATE_LOCATIONS)
-#show_all_tables()
-show_table('customers')
+def delete_table(table_name):
+    conn = sqlite3.connect(DATABASE_NAME)
+    cursor = conn.cursor()
+    cursor.execute(f''' DROP TABLE {table_name}; ''')
+    conn.commit()
+    conn.close()
+
+# create_table(sql_command_CREATE_CUSTOMERS)
+# create_table(sql_command_CREATE_LOCATIONS)
+# create_table(sql_command_CREATE_VENDORS)
+# create_table(sql_command_CREATE_ORDERS)
+show_all_tables()
+show_table_info('orders')
+#delete_table('locations')
