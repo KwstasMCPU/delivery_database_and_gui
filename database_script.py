@@ -1,14 +1,13 @@
 import sqlite3
-import os
 
 DATABASE_NAME = 'delivery.db'
 
 sql_command_CREATE_CUSTOMERS = '''
-CREATE TABLE customers ( 
-    customer_id TEXT NOT NULL, 
-    gender TEXT, 
-    status INTEGER, 
-    verified  INTEGER, 
+CREATE TABLE customers (
+    customer_id TEXT NOT NULL,
+    gender TEXT,
+    status INTEGER,
+    verified  INTEGER,
     created_at TEXT,
     PRIMARY KEY (customer_id)
 ) ;'''
@@ -49,7 +48,7 @@ CREATE TABLE orders (
     payment_mode INTEGER,
     vendor_discount_amount REAL,
     deliverydistance REAL,
-    delivered_time TEXT, 
+    delivered_time TEXT,
     created_at TEXT,
     PRIMARY KEY (order_id)
     FOREIGN KEY(customer_id) REFERENCES customers(customer_id)
@@ -57,7 +56,9 @@ CREATE TABLE orders (
     FOREIGN KEY(location_number) REFERENCES locations(location_number)
 );'''
 
-def create_table(sql_command):
+####################################################################################
+
+def create_table(sql_command, DATABASE_NAME):
     conn = sqlite3.connect(DATABASE_NAME)
     cursor = conn.cursor()
     cursor.execute(sql_command)
@@ -66,7 +67,7 @@ def create_table(sql_command):
     # close our connection
     conn.close()
 
-def show_all_tables():
+def show_all_tables(DATABASE_NAME):
     conn = sqlite3.connect(DATABASE_NAME)
     cursor = conn.cursor()
     cursor.execute(''' SELECT name FROM sqlite_master WHERE type='table';''')
@@ -77,7 +78,7 @@ def show_all_tables():
     # close our connection
     conn.close()
 
-def show_table_info(table_name):
+def show_table_info(table_name, DATABASE_NAME):
     conn = sqlite3.connect(DATABASE_NAME)
     cursor = conn.cursor()
     cursor.execute(f''' PRAGMA table_info({table_name}) ''')
@@ -88,17 +89,33 @@ def show_table_info(table_name):
     # close our connection
     conn.close()
 
-def delete_table(table_name):
+def show_table_rows(table_name, DATABASE_NAME, rows = 10):
+    conn = sqlite3.connect(DATABASE_NAME)
+    cursor = conn.cursor()
+    cursor.execute(f''' SELECT * FROM {table_name} LIMIT {rows}''')
+    conn.commit()
+    for row in cursor.fetchall():
+        print (row)
+    conn.close()
+
+def delete_table(table_name, DATABASE_NAME):
     conn = sqlite3.connect(DATABASE_NAME)
     cursor = conn.cursor()
     cursor.execute(f''' DROP TABLE {table_name}; ''')
     conn.commit()
     conn.close()
 
+
+
+# def mean():
+#     cursor.execute('SELECT this FROM this // ')
+#     mean(....)
+#     conn.commit()
+#     conn.close()
+
 # create_table(sql_command_CREATE_CUSTOMERS)
 # create_table(sql_command_CREATE_LOCATIONS)
 # create_table(sql_command_CREATE_VENDORS)
 # create_table(sql_command_CREATE_ORDERS)
-show_all_tables()
-show_table_info('orders')
-#delete_table('locations')
+# show_all_tables(DATABASE_NAME)
+#show_table_info('vendors', DATABASE_NAME)
