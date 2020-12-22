@@ -1,5 +1,5 @@
 from make_the_dataframes import make_the_dataframes
-from database_script import create_table, show_all_tables, show_table_info, show_table_rows
+from database_script import *
 import numpy as np
 import pandas as pd
 import sqlite3
@@ -21,5 +21,5 @@ def load_dataframe_to_db(df, table, DATABASE_NAME, chunk=100):
 
 #print(vendors_clean_df.head)
 print('')
-show_table_info('vendors', DATABASE_NAME)
-show_table_rows('vendors', DATABASE_NAME, 10)
+show_table_info('vendors')
+show_table_rows('vendors',10)

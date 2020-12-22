@@ -1,7 +1,5 @@
 import sqlite3
 
-DATABASE_NAME = 'delivery.db'
-
 sql_command_CREATE_CUSTOMERS = '''
 CREATE TABLE customers (
     customer_id TEXT NOT NULL,
@@ -58,7 +56,7 @@ CREATE TABLE orders (
 
 ####################################################################################
 
-def create_table(sql_command, DATABASE_NAME):
+def create_table(sql_command, DATABASE_NAME = 'delivery.db'):
     conn = sqlite3.connect(DATABASE_NAME)
     cursor = conn.cursor()
     cursor.execute(sql_command)
@@ -67,7 +65,7 @@ def create_table(sql_command, DATABASE_NAME):
     # close our connection
     conn.close()
 
-def show_all_tables(DATABASE_NAME):
+def show_all_tables(DATABASE_NAME = 'delivery.db'):
     conn = sqlite3.connect(DATABASE_NAME)
     cursor = conn.cursor()
     cursor.execute(''' SELECT name FROM sqlite_master WHERE type='table';''')
@@ -78,18 +76,18 @@ def show_all_tables(DATABASE_NAME):
     # close our connection
     conn.close()
 
-def show_table_info(table_name, DATABASE_NAME):
+def show_table_info(table_name, DATABASE_NAME = 'delivery.db'):
     conn = sqlite3.connect(DATABASE_NAME)
     cursor = conn.cursor()
     cursor.execute(f''' PRAGMA table_info({table_name}) ''')
     conn.commit()
     result = cursor.fetchall()
     for item in result:
-        print(item)
+        print(item[1])
     # close our connection
     conn.close()
 
-def show_table_rows(table_name, DATABASE_NAME, rows = 10):
+def show_table_rows(table_name, DATABASE_NAME = 'delivery.db', rows = 10):
     conn = sqlite3.connect(DATABASE_NAME)
     cursor = conn.cursor()
     cursor.execute(f''' SELECT * FROM {table_name} LIMIT {rows}''')
@@ -98,24 +96,20 @@ def show_table_rows(table_name, DATABASE_NAME, rows = 10):
         print (row)
     conn.close()
 
-def delete_table(table_name, DATABASE_NAME):
+def delete_table(table_name, DATABASE_NAME = 'delivery.db'):
     conn = sqlite3.connect(DATABASE_NAME)
     cursor = conn.cursor()
     cursor.execute(f''' DROP TABLE {table_name}; ''')
     conn.commit()
     conn.close()
 
-
-
-# def mean():
-#     cursor.execute('SELECT this FROM this // ')
-#     mean(....)
-#     conn.commit()
-#     conn.close()
-
 # create_table(sql_command_CREATE_CUSTOMERS)
 # create_table(sql_command_CREATE_LOCATIONS)
 # create_table(sql_command_CREATE_VENDORS)
 # create_table(sql_command_CREATE_ORDERS)
-# show_all_tables(DATABASE_NAME)
-#show_table_info('vendors', DATABASE_NAME)
+
+show_all_tables()
+show_table_info('vendors')
+
+
+
