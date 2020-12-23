@@ -2,6 +2,7 @@ import sqlite3
 
 sql_command_CREATE_CUSTOMERS = '''
 CREATE TABLE customers (
+    index INT NOT NULL AUTO_INCREMENT,
     customer_id TEXT NOT NULL,
     gender TEXT,
     status INTEGER,
@@ -12,6 +13,7 @@ CREATE TABLE customers (
 
 sql_command_CREATE_LOCATIONS = '''
 CREATE TABLE locations (
+    index INT NOT NULL AUTO_INCREMENT,
     customer_id TEXT NOT NULL,
     location_number INTEGER NOT NULL,
     latitude REAL,
@@ -22,6 +24,7 @@ CREATE TABLE locations (
 
 sql_command_CREATE_VENDORS = '''
 CREATE TABLE vendors (
+    index INT NOT NULL AUTO_INCREMENT,
     vendors_id INTEGER NOT NULL,
     latitude REAL,
     longitude REAL,
@@ -37,6 +40,7 @@ CREATE TABLE vendors (
 
 sql_command_CREATE_ORDERS = '''
 CREATE TABLE orders (
+    index INT NOT NULL AUTO_INCREMENT,
     order_id REAL NOT NULL,
     customer_id TEXT NOT NULL,
     vendor_id INTEGER NOT NULL,
@@ -87,8 +91,8 @@ def show_table_info(table_name, DATABASE_NAME = 'delivery.db'):
     # close our connection
     conn.close()
 
-def show_table_rows(table_name, DATABASE_NAME = 'delivery.db', rows = 10):
-    conn = sqlite3.connect(DATABASE_NAME)
+def show_table_rows(table_name, rows = 10):
+    conn = sqlite3.connect('delivery.db')
     cursor = conn.cursor()
     cursor.execute(f''' SELECT * FROM {table_name} LIMIT {rows}''')
     conn.commit()
@@ -110,6 +114,7 @@ def delete_table(table_name, DATABASE_NAME = 'delivery.db'):
 
 show_all_tables()
 show_table_info('vendors')
+show_table_rows('vendors', 10)
 
 
 

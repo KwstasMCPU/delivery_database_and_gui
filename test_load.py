@@ -4,12 +4,12 @@ import numpy as np
 import pandas as pd
 import sqlite3
 
-DATABASE_NAME = 'delivery.db'
-customer_clean_df, locations_clean_df, orders_clean_df, vendors_clean_df = make_the_dataframes()
+# DATABASE_NAME = 'delivery.db'
+# customer_clean_df, locations_clean_df, orders_clean_df, vendors_clean_df = make_the_dataframes()
 
 def load_dataframe_to_db(df, table, DATABASE_NAME, chunk=100):
     conn = sqlite3.connect(DATABASE_NAME)
-    df.to_sql(table, conn, if_exists='fail', index = True, chunksize = 100)
+    df.to_sql(table, conn, if_exists='replace', index = True, chunksize = 100)
     conn.commit()
     conn.close()
 
@@ -20,6 +20,6 @@ def load_dataframe_to_db(df, table, DATABASE_NAME, chunk=100):
 
 
 #print(vendors_clean_df.head)
-print('')
-show_table_info('vendors')
-show_table_rows('vendors',10)
+# print('')
+# show_table_info('vendors')
+show_table_rows('vendors', 10)
