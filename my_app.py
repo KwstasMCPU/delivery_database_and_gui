@@ -18,6 +18,9 @@ def show_all_locations():
     select_all_from('locations')
 
 def select_all_from(table_name):
+    for i in my_tree.get_children():
+        print('times')
+        my_tree.delete(i)
     conn = sqlite3.connect('delivery.db')
     cursor = conn.cursor()
     #command = SQL_command_entry.get()
@@ -27,7 +30,6 @@ def select_all_from(table_name):
     column_name_ls = []
     for column_name in table_info:
         column_name_ls.append(column_name[1])
-    my_tree = ttk.Treeview(root)
     my_tree['columns'] = (column_name_ls)
     my_tree.column('#0', width=0)
     my_tree.heading('#0', text='', anchor='w')
@@ -35,7 +37,6 @@ def select_all_from(table_name):
         my_tree.column(column, width=100)
         my_tree.heading(column, text=column, anchor='w')
     my_tree.insert(parent='', index='end', iid=0, text='', values=())
-    my_tree.grid_forget()
     my_tree.grid(row=4, column=1)
 
     try:
@@ -66,6 +67,7 @@ def show_all_tables():
 root = tk.Tk()
 root.geometry('1000x450')
 root.title('SQLite gui')
+my_tree = ttk.Treeview(root)
 
 # SETTING THE LABELS AND ENTRIES
 
