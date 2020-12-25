@@ -51,6 +51,9 @@ def entry_customers():
 
 
 def select_all_from(table_name):
+    for i in my_tree.get_children():
+        print('times')
+        my_tree.delete(i)
     conn = sqlite3.connect('delivery.db')
     cursor = conn.cursor()
     cursor.execute(f''' PRAGMA table_info({table_name}); ''')
@@ -119,7 +122,6 @@ def create_histogram():
 
 
 # ##### gui code ####
-
 
 
 # SETTING THE LABELS AND ENTRIES
