@@ -187,7 +187,7 @@ def mean_item_count():
     '''
     conn = sqlite3.connect('delivery.db')
     df = pd.read_sql_query(''' SELECT item_count FROM orders ''', conn )
-    label_screen.config(text="{:.4f}".format(df['item_count'].mean()))
+    label_screen.config(text="Mean item_count = "+"{:.4f}".format(df['item_count'].mean()))
 
 def mean_grand_total():
     '''
@@ -196,7 +196,7 @@ def mean_grand_total():
     '''
     conn = sqlite3.connect('delivery.db')
     df = pd.read_sql_query(''' SELECT grand_total FROM orders ''', conn )
-    label_screen.config(text="{:.4f}".format(df['grand_total'].mean())) # formats the float to 4 decimals
+    label_screen.config(text="Mean grand_total = "+"{:.4f}".format(df['grand_total'].mean())) # formats the float to 4 decimals
 
 def run_sql_command():
     """
@@ -232,7 +232,7 @@ def run_sql_command():
 ############################## GUI CODE #############################################
 
 root = tk.Tk()
-root.geometry('1500x700')
+root.geometry('1600x600')
 root.title('SQLite gui')
 
 buttons_frame = tk.LabelFrame(root, text='Tools', padx=8, pady=8)
