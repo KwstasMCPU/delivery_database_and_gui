@@ -59,6 +59,12 @@ CREATE TABLE orders (
 ####################################################################################
 
 def create_table(sql_command, DATABASE_NAME = 'delivery.db'):
+    """
+    This function is meant to create a database table
+    Parameters:
+        sql_command (str): The sql command needed to create an SQLite table
+        DATABASE_NAME (str): the name of the database the table to be created (default 'delivery.db')
+    """
     conn = sqlite3.connect(DATABASE_NAME)
     cursor = conn.cursor()
     cursor.execute(sql_command)
@@ -68,6 +74,11 @@ def create_table(sql_command, DATABASE_NAME = 'delivery.db'):
     conn.close()
 
 def show_all_tables(DATABASE_NAME = 'delivery.db'):
+    """
+    This function prints the table names of a database
+    Parameters:
+        DATABASE_NAME (str): the name of the database the table to be created (default 'delivery.db')
+    """
     conn = sqlite3.connect(DATABASE_NAME)
     cursor = conn.cursor()
     cursor.execute(''' SELECT name FROM sqlite_master WHERE type='table';''')
@@ -79,6 +90,12 @@ def show_all_tables(DATABASE_NAME = 'delivery.db'):
     conn.close()
 
 def show_table_info(table_name, DATABASE_NAME = 'delivery.db'):
+    """
+    This function prints the information of a database table (look: https://www.sqlite.org/pragma.html#pragma_table_info, https://www.sqlite.org/pragma.html#pragma_table_info )
+    Parameters:
+        table_name (str): the table we request to receive information
+        DATABASE_NAME (str): the name of the database where the table is (default 'delivery.db')
+    """
     conn = sqlite3.connect(DATABASE_NAME)
     cursor = conn.cursor()
     cursor.execute(f''' PRAGMA table_info({table_name}) ''')
@@ -89,8 +106,15 @@ def show_table_info(table_name, DATABASE_NAME = 'delivery.db'):
     # close our connection
     conn.close()
 
-def show_table_rows(table_name, rows = 100):
-    conn = sqlite3.connect('delivery.db')
+def show_table_rows(table_name, DATABASE_NAME='delivery.db', rows = 100):
+    """
+    This function makes a database query and returns the results.
+    Parameters:
+        table_name (str): the table we want to perform the query
+        DATABASE_NAME (str): the name of the database where the table is (default 'delivery.db')
+        rows (int): the number of rows to limited our results (default 100)
+    """
+    conn = sqlite3.connect(DATABASE_NAME)
     cursor = conn.cursor()
     cursor.execute(f''' SELECT * FROM {table_name} LIMIT {rows};''')
     conn.commit()
@@ -99,6 +123,12 @@ def show_table_rows(table_name, rows = 100):
     conn.close()
 
 def delete_table(table_name, DATABASE_NAME = 'delivery.db'):
+    """
+    This functions deleted a table from the database
+    Parameters:
+        table_name (str): the table we want to delete
+        DATABASE_NAME (str): the name of the database the table to be deleted (default 'delivery.db')
+    """
     conn = sqlite3.connect(DATABASE_NAME)
     cursor = conn.cursor()
     cursor.execute(f''' DROP TABLE {table_name}; ''')
