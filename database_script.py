@@ -1,5 +1,7 @@
 import sqlite3
 
+# for all tables no index is stated, since by default SQLite creates rowid
+
 sql_command_CREATE_CUSTOMERS = '''
 CREATE TABLE customers (
     customer_id TEXT NOT NULL,
@@ -22,7 +24,7 @@ CREATE TABLE locations (
 
 sql_command_CREATE_VENDORS = '''
 CREATE TABLE vendors (
-    vendors_id INTEGER NOT NULL,
+    vendor_id INTEGER NOT NULL,
     latitude REAL,
     longitude REAL,
     delivery_charge REAL,
@@ -32,7 +34,7 @@ CREATE TABLE vendors (
     vendor_tag_name TEXT,
     opening_time TEXT,
     closing_time TEXT,
-    PRIMARY KEY(vendors_id)
+    PRIMARY KEY(vendor_id)
 );'''
 
 sql_command_CREATE_ORDERS = '''
@@ -83,7 +85,7 @@ def show_table_info(table_name, DATABASE_NAME = 'delivery.db'):
     conn.commit()
     result = cursor.fetchall()
     for item in result:
-        print(item[1])
+        print(item)
     # close our connection
     conn.close()
 
@@ -108,15 +110,22 @@ def delete_table(table_name, DATABASE_NAME = 'delivery.db'):
 # create_table(sql_command_CREATE_VENDORS)
 # create_table(sql_command_CREATE_ORDERS)
 
-# show_all_tables()
-# print('=========')
-# show_table_info('customers')
-# print('=========')
-# show_table_info('orders')
-# print('=========')
-# show_table_info('locations')
-# print('=========')
-# show_table_info('vendors')
+# delete_table('customers')
+# delete_table('vendors')
+# delete_table('locations')
+# delete_table('orders')
+
+
+show_all_tables()
+print('cid # name # type # notnull # dflt_value # pk')
+print('=========')
+show_table_info('customers')
+print('=========')
+show_table_info('orders')
+print('=========')
+show_table_info('locations')
+print('=========')
+show_table_info('vendors')
 
 
 

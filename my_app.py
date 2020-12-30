@@ -6,7 +6,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from datetime import datetime
 
-
 def show_all_customers():
     """
     This functions is assigned to the show_all_customers_button.
@@ -77,10 +76,16 @@ def create_trees(column_name_ls, sql_command):
             Parameters:
                         column_name_ls (list): a list of the column names (str) of the given tables.
     """
-    global my_tree # the tree was made as a global variable in order to remove the previous generated tkk.Treeview object, otherwise more objects will be created, the newer atop the older ones.
+    global my_tree         # the tree was made as a global variable in order to remove the previous generated tkk.Treeview object, otherwise more objects will be created, the newer atop the older ones.
+    global tree_scroll_y
+    global tree_scroll_x
     try:
         my_tree.grid_forget()
-        del my_tree # the previous treeview instance is deleted to save memory
+        tree_scroll_y.grid_forget()
+        tree_scroll_x.grid_forget()
+        del my_tree
+        del tree_scroll_y # the previous treeview instance is deleted to save memory
+        del tree_scroll_x
     except:
         pass
     my_tree = ttk.Treeview(treeview_frame)
@@ -91,6 +96,14 @@ def create_trees(column_name_ls, sql_command):
         my_tree.column(column, stretch=False, width=95)
         my_tree.heading(column, text=column, anchor='w')
     my_tree.insert(parent='', index='end', iid=0, text='', values=())
+    # Treeview scrollbar y-axis
+    tree_scroll_y = ttk.Scrollbar(treeview_frame, orient='vertical', command=my_tree.yview)
+    tree_scroll_y.grid(row=0, column=1, sticky='nse')
+    my_tree.configure(yscrollcommand=tree_scroll_y.set)
+    # Treeview scrollbar x-axis
+    tree_scroll_x = ttk.Scrollbar(treeview_frame, orient='horizontal', command=my_tree.xview)
+    tree_scroll_x.grid(row=1, column=0, sticky='swe')
+    my_tree.configure(xscrollcommand=tree_scroll_x.set)
     try:
         conn = sqlite3.connect('delivery.db')
         cursor = conn.cursor()
@@ -116,7 +129,7 @@ def show_all_table_names():
         cursor.execute(''' SELECT name FROM sqlite_master WHERE type='table';''')
         conn.commit()
         result = cursor.fetchall()
-        label_screen.config(text=result)
+        label_screen.config(text= result)
     except:
         label_screen.config(text='Error')
     conn.close()
@@ -162,9 +175,10 @@ def create_histogram():
     df = pd.read_sql_query(''' SELECT deliverydistance FROM orders ''', conn )
     f, ax = plt.subplots(figsize=(4, 4))
     df['deliverydistance'].hist(bins=40)
+    plt.xlabel('Delivery distance', fontsize=10)
     canvas = FigureCanvasTkAgg(f, master=plot_frame)  # A tk.DrawingArea.
     canvas.draw()
-    canvas.get_tk_widget().grid(row = 16, column = 0, columnspan=3)
+    canvas.get_tk_widget().grid() # row = 2, column = 10, columnspan=3
 
 def mean_item_count():
     '''
@@ -215,27 +229,40 @@ def run_sql_command():
     except Exception as e:
         label_screen.config(text=e)
 
-# ##### gui code ####
+############################## GUI CODE #############################################
 
 root = tk.Tk()
-root.geometry('1300x600')
+root.geometry('1500x700')
 root.title('SQLite gui')
 
-buttons_frame = tk.Frame(root, highlightbackground='grey'  ,highlightthickness=1, padx=5, pady=5)
-buttons_frame.grid(row=0, column=0, rowspan=10)
+buttons_frame = tk.LabelFrame(root, text='Tools', padx=8, pady=8)
+buttons_frame.grid(row=0, column=0, rowspan=10, columnspan=1, sticky="WN")
+buttons_frame.grid_columnconfigure(0, weight=1)
+buttons_frame.grid_rowconfigure(0, weight=1)
 
 sql_entry_and_screen_frame = tk.LabelFrame(root, text='SQL Command', padx=5, pady=5)
-sql_entry_and_screen_frame.grid(row=0, column=1, rowspan=2)
+sql_entry_and_screen_frame.grid(row=0, column=1, rowspan=2, columnspan=2, sticky="N")
+sql_entry_and_screen_frame.grid_columnconfigure(0, weight=1)
+sql_entry_and_screen_frame.grid_rowconfigure(0, weight=1)
+
 
 treeview_frame = tk.LabelFrame(root, text='Output window', padx=5, pady=5)
-treeview_frame.grid(row = 2, column = 1)
+treeview_frame.grid(row=3, column=1, rowspan=8, columnspan=9, sticky='W')
+treeview_frame.grid_columnconfigure(0, weight=1)
+treeview_frame.grid_rowconfigure(0, weight=1)
 
 down_frame = tk.LabelFrame(root, text="Insert new customer's details", padx=5, pady=5)
-down_frame.grid(row = 9, column=1)
+down_frame.grid(row = 11, column=1)
+down_frame.grid_columnconfigure(0, weight=1)
+down_frame.grid_rowconfigure(0, weight=1)
 
-plot_frame = tk.LabelFrame(root, text='Delivery distance histogram', highlightbackground='black', highlightthickness=1, padx=5, pady=5)
-plot_frame.grid(row=11, column = 1, columnspan=3)
+plot_frame = tk.LabelFrame(root, text='Delivery distance histogram', padx=20, pady=5)
+plot_frame.grid(row=3, column = 11, columnspan=3, sticky='WN')
+plot_frame.grid_columnconfigure(0, weight=1)
+plot_frame.grid_rowconfigure(0, weight=1)
 
+# the purpose of creating a dummy treeview and canvas is to fill the empty space
+# Treeview (return table data)
 dummy_columns = [x for x in range(0,7)]
 my_tree = ttk.Treeview(treeview_frame, columns=dummy_columns)
 my_tree['columns'] = (dummy_columns)
@@ -246,14 +273,28 @@ for column in dummy_columns:
     my_tree.heading(column, text=column, anchor='w')
 my_tree.grid(row=0, column=0, rowspan=8, columnspan=10)
 
+# Treeview scrollbar y-axis
+tree_scroll_y = ttk.Scrollbar(treeview_frame, orient='vertical', command=my_tree.yview)
+tree_scroll_y.grid(row=0, column=1, sticky='nse')
+my_tree.configure(yscrollcommand=tree_scroll_y.set)
+
+# Treeview scrollbar x-axis
+tree_scroll_x = ttk.Scrollbar(treeview_frame, orient='horizontal', command=my_tree.xview)
+tree_scroll_x.grid(row=1, column=0, sticky='swe')
+my_tree.configure(xscrollcommand=tree_scroll_x.set)
+
+# empty canvas for the plot
+canvas = tk.Canvas(master=plot_frame, bg='white', height=300, width=300)
+canvas.grid()
+
 
 # SETTING THE LABELS AND ENTRIES
 
-sql_command_entry = tk.Entry(sql_entry_and_screen_frame, width=60)
-sql_command_entry.grid(row=0, column=1)
+sql_command_entry = tk.Entry(sql_entry_and_screen_frame, width=60, selectborderwidth=5)
+sql_command_entry.grid(row=0, column=3)
 
-label_screen = tk.Label(sql_entry_and_screen_frame, width=60, bg='green', fg='white', text='screen')
-label_screen.grid(row=1, column=1)
+label_screen = tk.Label(sql_entry_and_screen_frame, bg='green', fg='white', width=50)
+label_screen.grid(row=1, column=3)
 
 customer_id_label = tk.Label(down_frame, width=20, text='Customer ID')
 customer_id_label.grid(row=9, column=1, padx=0)
@@ -277,8 +318,8 @@ customer_verified_entry.grid(row=10, column=4, padx=0)
 
 # SETTING BUTTONs
 
-sql_command_run_button = tk.Button(buttons_frame, text='Run command', command=run_sql_command, width=20)
-sql_command_run_button.grid(row=0, column=0)
+sql_command_run_button = tk.Button(sql_entry_and_screen_frame, text='Run command', command=run_sql_command, width=20)
+sql_command_run_button.grid(row=0, column=2)
 
 show_all_table_names_button = tk.Button(buttons_frame, text='Table names', command=show_all_table_names, width= 20)
 show_all_table_names_button.grid(row=1, column=0)
@@ -301,18 +342,19 @@ mean_item_count_button.grid(row=6, column=0)
 mean_grand_total_button = tk.Button(buttons_frame, text='Mean Grand Total', command=mean_grand_total, width=20)
 mean_grand_total_button.grid(row=7, column=0)
 
-entry_customers_button = tk.Button(buttons_frame, text="Entry customers", command=entry_customers, width = 20)
-entry_customers_button.grid(row=8, column=0)
+entry_customers_button = tk.Button(down_frame, text="Entry customers", command=entry_customers, width = 20)
+entry_customers_button.grid(row=10)
 
 create_histogram_buttom = tk.Button(buttons_frame, text='Create histogram', command=create_histogram, width = 20)
 create_histogram_buttom.grid(row=9, column=0)
 
-quit = tk.Button(buttons_frame, text="QUIT", fg="red", command=root.destroy, width=20)
+quit = tk.Button(buttons_frame, text="QUIT", fg="red", command=root.quit, width=20)
 quit.grid(row=10, column=0)
 
 
 # GUI MAIN LOOP
 root.mainloop()
+root.destroy()
 
 
 
