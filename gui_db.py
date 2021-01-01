@@ -130,8 +130,8 @@ def show_all_table_names():
         conn.commit()
         result = cursor.fetchall()
         label_screen.config(text= result)
-    except:
-        label_screen.config(text='Error')
+    except Exception as e:
+        label_screen.config(text=e)
     conn.close()
 
 def entry_customers():
@@ -145,16 +145,32 @@ def entry_customers():
     # getting the entries from the user input
     customer_id = customer_id_entry.get()
     gender = customer_gender_entry.get()
+    gender = gender.upper()
     status = customer_status_entry.get()
     verified = customer_verified_entry.get()
+    try:
+        status = int(status)
+        verified = int(verified)
+    except Exception as e:
+        print(e)
     dateTimeObj = datetime.now() # creating a datetime object to use it as the created_at variable of the customers table
     created_at = dateTimeObj.strftime("%Y-%m-%d %H:%M:%S") # format it to '2020-12-01 16:02:05'
     data_tuple = (customer_id, gender, status, verified, created_at)
     if not customer_id:
-        label_screen.config(text='Give Customer ID', fg='red')
+        label_screen.config(text='Give Customer ID', fg='red', font=(12))
     else:
-        cursor.execute(f'''INSERT INTO customers (customer_id, gender, status, verified, created_at) VALUES(?, ?, ?, ?, ?);''', data_tuple)
-        label_screen.config(text=f'New customer with: {data_tuple}, inserted.')
+        if not (status in [1,0] and verified in [1,0]):
+            label_screen.config(text='status and verified can received only 1 or 0 values', fg='red', font=(12))
+        else:
+            if gender not in ['M', 'F']:
+                label_screen.config(text='gender can received only M or F values', fg='red', font=(12))
+            else:
+                try:
+                    cursor.execute(f'''INSERT INTO customers (customer_id, gender, status, verified, created_at) VALUES(?, ?, ?, ?, ?);''', data_tuple)
+                    label_screen.config(text=f'New customer with: {data_tuple}, inserted.')
+                except Exception as e:
+                    print(e)
+                    label_screen.config(text=e)
     conn.commit()
     conn.close()
 
@@ -290,10 +306,10 @@ canvas.grid()
 
 # SETTING THE LABELS AND ENTRIES
 
-sql_command_entry = tk.Entry(sql_entry_and_screen_frame, width=60, selectborderwidth=5)
+sql_command_entry = tk.Entry(sql_entry_and_screen_frame, width=70, selectborderwidth=5)
 sql_command_entry.grid(row=0, column=3)
 
-label_screen = tk.Label(sql_entry_and_screen_frame, bg='green', fg='white', width=50)
+label_screen = tk.Label(sql_entry_and_screen_frame, bg='green', fg='white', width=70)
 label_screen.grid(row=1, column=3)
 
 customer_id_label = tk.Label(down_frame, width=20, text='Customer ID')
