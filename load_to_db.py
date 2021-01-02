@@ -73,7 +73,7 @@ def show_table_info(table_name, DATABASE_NAME = 'delivery.db'):
 
 def show_table_rows(table_name, DATABASE_NAME='delivery.db', rows = 100):
     """
-    This function makes a database query and returns the results.
+    This function makes a database SELECT query and prints the results.
     Parameters:
         table_name (str): the table we want to perform the query
         DATABASE_NAME (str): the name of the database where the table is (default 'delivery.db')
@@ -107,6 +107,11 @@ customer_clean_df, locations_clean_df, orders_clean_df, vendors_clean_df = make_
 # load_dataframe_to_db(vendors_clean_df, 'vendors', DATABASE_NAME)
 # load_dataframe_to_db(orders_clean_df, 'orders', DATABASE_NAME)
 
+# delete_table('customers')
+# delete_table('orders')
+# delete_table('vendors')
+# delete_table('locations')
+
 show_all_tables()
 print('cid # name # type # notnull # dflt_value # pk')
 print('=========')
@@ -117,3 +122,16 @@ print('=========')
 show_table_info('locations')
 print('=========')
 show_table_info('vendors')
+
+print('#######')
+print('customers table')
+show_table_rows('customers')
+print('#######')
+print('locations table')
+show_table_rows('locations')
+print('#######')
+print('vendors table')
+show_table_rows('vendors')
+print('#######')
+print('orders table')
+show_table_rows('orders')

@@ -69,12 +69,12 @@ def show_table_column_names(table_name):
 def create_trees(column_name_ls, sql_command):
     """
     Creates treeview widgets, and depicts them on the GUI.
-    Its time user presses a select {table_name} button, a new treeview widget is created,
+    Every time the user presses a select {table_name} button, a new treeview widget is created,
     while the previous is un grided and deleted.
     Then the treeview is populated by the data of the relevant table.
     The results are limited to the first 100 rows.
-            Parameters:
-                        column_name_ls (list): a list of the column names (str) of the given tables.
+        Parameters:
+            column_name_ls (list): a list of the column names (str) of the given tables.
     """
     global my_tree         # the tree was made as a global variable in order to remove the previous generated tkk.Treeview object, otherwise more objects will be created, the newer atop the older ones.
     global tree_scroll_y
@@ -83,19 +83,19 @@ def create_trees(column_name_ls, sql_command):
         my_tree.grid_forget()
         tree_scroll_y.grid_forget()
         tree_scroll_x.grid_forget()
-        del my_tree
-        del tree_scroll_y # the previous treeview instance is deleted to save memory
+        del my_tree # the previous treeview instance is deleted to save memory
+        del tree_scroll_y
         del tree_scroll_x
     except:
         pass
-    my_tree = ttk.Treeview(treeview_frame)
-    my_tree['columns'] = (column_name_ls)
-    my_tree.column('#0', width=0)
+    my_tree = ttk.Treeview(treeview_frame) # create a treeview object in the treevriew_frame
+    my_tree['columns'] = (column_name_ls) # giving the column names
+    my_tree.column('#0', width=0) # its the first default column (like a treeview index), we set it to minimum width in order not to be visible
     my_tree.heading('#0', text='', anchor='w')
     for column in column_name_ls:
-        my_tree.column(column, stretch=False, width=95)
-        my_tree.heading(column, text=column, anchor='w')
-    my_tree.insert(parent='', index='end', iid=0, text='', values=())
+        my_tree.column(column, stretch=False, width=95) # its column have a fixed width to 95, with no resize even if the widget size is change (see: https://docs.python.org/3/library/tkinter.ttk.html)
+        my_tree.heading(column, text=column, anchor='w') # setting column names, and their position (west)
+    my_tree.insert(parent='', index='end', iid=0, text='', values=()) # 
     # Treeview scrollbar y-axis
     tree_scroll_y = ttk.Scrollbar(treeview_frame, orient='vertical', command=my_tree.yview)
     tree_scroll_y.grid(row=0, column=1, sticky='nse')
@@ -111,12 +111,12 @@ def create_trees(column_name_ls, sql_command):
         conn.commit
         result = cursor.fetchall()
         for row in result:
-            my_tree.insert("", tk.END, values=row)
+            my_tree.insert("", tk.END, values=row) # inserting the results of the query to the treeview
         my_tree.grid(row=0, column=0, rowspan=8, columnspan=10)
         conn.close()
     except Exception as e:
         print(e)
-        label_screen.config(text=e)
+        label_screen.config(text=e, font='Helvetica 9 bold', fg='red')
 
 def show_all_table_names():
     """
@@ -129,9 +129,9 @@ def show_all_table_names():
         cursor.execute(''' SELECT name FROM sqlite_master WHERE type='table';''')
         conn.commit()
         result = cursor.fetchall()
-        label_screen.config(text= result)
+        label_screen.config(text= result, font='Helvetica 9 bold', fg='white')
     except Exception as e:
-        label_screen.config(text=e)
+        label_screen.config(text=e, font='Helvetica 9 bold', fg='red')
     conn.close()
 
 def entry_customers():
@@ -139,6 +139,7 @@ def entry_customers():
     Inserts a new customer into the customers table.
     The new customer's details are given through the respective entry labels.
     If no customer_id is given, error message pops to the label_screen.
+    If no proper values for gender, status or verified is given, error appears in the label_screen. (can receive null values)
     """
     conn = sqlite3.connect('delivery.db')
     cursor = conn.cursor()
@@ -146,31 +147,38 @@ def entry_customers():
     customer_id = customer_id_entry.get()
     gender = customer_gender_entry.get()
     gender = gender.upper()
+    if gender == '':    # Blank values are converted to None type since, our database stores and depicts blank values as None.
+        gender = None
     status = customer_status_entry.get()
+    if status == '':
+        status = None
     verified = customer_verified_entry.get()
+    if verified == '':
+        verified = None
     try:
-        status = int(status)
+        status = int(status) # try to convert them to integers, since they are stored as int in our database
         verified = int(verified)
     except Exception as e:
         print(e)
     dateTimeObj = datetime.now() # creating a datetime object to use it as the created_at variable of the customers table
     created_at = dateTimeObj.strftime("%Y-%m-%d %H:%M:%S") # format it to '2020-12-01 16:02:05'
     data_tuple = (customer_id, gender, status, verified, created_at)
-    if not customer_id:
-        label_screen.config(text='Give Customer ID', fg='red', font=(12))
+    # handling wrong entry values
+    if not customer_id: # no customer_id is given
+        label_screen.config(text='Give Customer ID', font='Helvetica 9 bold', fg='red')
     else:
-        if not (status in [1,0] and verified in [1,0]):
-            label_screen.config(text='status and verified can received only 1 or 0 values', fg='red', font=(12))
+        if not (status in [1,0,None] and verified in [1,0,None]):
+            label_screen.config(text='status and verified can receive only 1, 0 values or left empty', font='Helvetica 9 bold',  fg='red')
         else:
-            if gender not in ['M', 'F']:
-                label_screen.config(text='gender can received only M or F values', fg='red', font=(12))
+            if gender not in ['M', 'F',None]:
+                label_screen.config(text='gender can receive only M or F values or left empty', font='Helvetica 9 bold', fg='red')
             else:
                 try:
                     cursor.execute(f'''INSERT INTO customers (customer_id, gender, status, verified, created_at) VALUES(?, ?, ?, ?, ?);''', data_tuple)
-                    label_screen.config(text=f'New customer with: {data_tuple}, inserted.')
+                    label_screen.config(text=f'New customer with: {data_tuple}, inserted.', font='Helvetica 9 bold', fg='green')
                 except Exception as e:
                     print(e)
-                    label_screen.config(text=e)
+                    label_screen.config(text=e, font='Helvetica 9 bold', fg='red')
     conn.commit()
     conn.close()
 
@@ -186,12 +194,17 @@ def create_histogram():
         del canvas
     except:
         pass
-    # the data will be collected by the database not by the csv file.
     conn = sqlite3.connect('delivery.db')
-    df = pd.read_sql_query(''' SELECT deliverydistance FROM orders ''', conn )
-    f, ax = plt.subplots(figsize=(4, 4))
-    df['deliverydistance'].hist(bins=40)
-    plt.xlabel('Delivery distance', fontsize=10)
+    df = pd.read_sql_query(''' SELECT deliverydistance FROM orders ''', conn ) # Returns a DataFrame corresponding to the result set of the query string
+    f, ax = plt.subplots(figsize=(4, 4)) # initialise the plot and setting its size
+    df['deliverydistance'].hist(bins=40) # create a histogram with 40 bins
+    for label in (ax.get_xticklabels() + ax.get_yticklabels()): # seting y and x label values size
+	    label.set_fontsize(8)
+    ax.set_xlim(right=16)   # seting the right limit of our plot to 16, since there was a bit of extra white space
+    plt.gcf().subplots_adjust(left=0.18) # adjusting the plot so the y title label fit within the frame
+    plt.title('Delivery distance distribution', fontsize=10)
+    plt.ylabel('Counts', fontsize=9)
+    plt.xlabel('Delivery distance', fontsize=9)
     canvas = FigureCanvasTkAgg(f, master=plot_frame)  # A tk.DrawingArea.
     canvas.draw()
     canvas.get_tk_widget().grid() # row = 2, column = 10, columnspan=3
@@ -202,8 +215,9 @@ def mean_item_count():
     and returns it in the label_screen, formated as a float with 4 decimals
     '''
     conn = sqlite3.connect('delivery.db')
-    df = pd.read_sql_query(''' SELECT item_count FROM orders ''', conn )
-    label_screen.config(text="Mean item_count = "+"{:.4f}".format(df['item_count'].mean()))
+    df = pd.read_sql_query(''' SELECT item_count FROM orders ''', conn ) # Returns a DataFrame corresponding to the result set of the query string
+    label_screen.config(text="Mean item_count = "+"{:.4f}".format(df['item_count'].mean()),  # calculates the mean and format it to float with 4 decimals
+                        font='Helvetica 9 bold', fg='white')
 
 def mean_grand_total():
     '''
@@ -211,39 +225,42 @@ def mean_grand_total():
     and returns it in the label_screen, formated as a float with 4 decimals
     '''
     conn = sqlite3.connect('delivery.db')
-    df = pd.read_sql_query(''' SELECT grand_total FROM orders ''', conn )
-    label_screen.config(text="Mean grand_total = "+"{:.4f}".format(df['grand_total'].mean())) # formats the float to 4 decimals
+    df = pd.read_sql_query(''' SELECT grand_total FROM orders ''', conn ) # Returns a DataFrame corresponding to the result set of the query string
+    label_screen.config(text="Mean grand_total = "+"{:.4f}".format(df['grand_total'].mean()), # calculates the grand_total and format it to float with 4 decimals
+                        font='Helvetica 9 bold', fg='white')
 
 def run_sql_command():
     """
     This function runs an SQL command, the user has typed into the sql_command_entry entry label.
     If its a 'SELECT' query, the result is shown in the treeview widget.
     Else it returns success message in the label_screen.
-    Cannot handle SELECT * command
+    Cannot handle 'SELECT *' command
     """
     conn = sqlite3.connect('delivery.db')
     cursor = conn.cursor()
     sql_command = sql_command_entry.get()
     try:
-        if sql_command.split()[0].upper() == 'SELECT': # check if the first word is SELECT, show we need to return the results to the treeview
-            table_name = sql_command.split()[3]
+        if sql_command.split()[0].upper() == 'SELECT': # check if the first word is SELECT
+            table_name = sql_command.split()[3] # e.g. SELECT * FROM customers,,, table_name = customers
             try:
                 column_names_ls = show_table_column_names(table_name)
                 create_trees(column_names_ls, sql_command)
             except Exception as e:
-                label_screen.config(text=e)
+                label_screen.config(text=e, font='Helvetica 9 bold', fg='red')
         else:
             try:
                 cursor.execute(sql_command)
                 conn.commit()
-                conn.close()
-                confirmation_message = (", ".join([f'{sql_command}','runned successfully.']))
-                label_screen.config(text=confirmation_message)
+                confirmation_message = (", ".join([f'{sql_command}','ran successfully.']))
+                label_screen.config(text=confirmation_message, font='Helvetica 9 bold', fg='green')
                 print(confirmation_message)
+                result = cursor.fetchall()
+                print(result)
             except Exception as e:
-                label_screen.config(text=e)
+                label_screen.config(text=e, font='Helvetica 9 bold', fg='red')
     except Exception as e:
-        label_screen.config(text=e)
+        label_screen.config(text=e, font='Helvetica 9 bold', fg='red')
+    conn.close()
 
 ############################## GUI CODE #############################################
 
@@ -272,8 +289,8 @@ down_frame.grid(row = 11, column=1)
 down_frame.grid_columnconfigure(0, weight=1)
 down_frame.grid_rowconfigure(0, weight=1)
 
-plot_frame = tk.LabelFrame(root, text='Delivery distance histogram', padx=20, pady=5)
-plot_frame.grid(row=3, column = 11, columnspan=3, sticky='WN')
+plot_frame = tk.LabelFrame(root, text='Delivery distance histogram', padx=2, pady=5)
+plot_frame.grid(row=3, column = 11, rowspan=6, columnspan=4, sticky='WN')
 plot_frame.grid_columnconfigure(0, weight=1)
 plot_frame.grid_rowconfigure(0, weight=1)
 
@@ -300,7 +317,7 @@ tree_scroll_x.grid(row=1, column=0, sticky='swe')
 my_tree.configure(xscrollcommand=tree_scroll_x.set)
 
 # empty canvas for the plot
-canvas = tk.Canvas(master=plot_frame, bg='white', height=300, width=300)
+canvas = tk.Canvas(master=plot_frame, bg='white', height=400, width=400)
 canvas.grid()
 
 
@@ -309,7 +326,7 @@ canvas.grid()
 sql_command_entry = tk.Entry(sql_entry_and_screen_frame, width=70, selectborderwidth=5)
 sql_command_entry.grid(row=0, column=3)
 
-label_screen = tk.Label(sql_entry_and_screen_frame, bg='green', fg='white', width=70)
+label_screen = tk.Label(sql_entry_and_screen_frame, bg='black', fg='white', width=70)
 label_screen.grid(row=1, column=3)
 
 customer_id_label = tk.Label(down_frame, width=20, text='Customer ID')
