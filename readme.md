@@ -12,5 +12,5 @@ Brief explanation of the files (its advisable to run the files with this order):
 3. load_to_db.py: Loads the .csv cleaned files into the SQLite 'delivery.db'. Consists with functions, to delete, show schema info, show table info, and table data.
 4. gui_db.py: Consists the GUI code.
 
-![](screenshots/img1.png)
+![](screenshots/img1.png)(https://www.youtube.com/watch?v=GWAfYFhoK_U&feature=youtu.be&ab_channel=LTravel)
 
