@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg # FigureCanvasTkAgg is needed in order to draw a matplotlib graph on a tkitner application
 import sqlite3
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -10,7 +10,8 @@ def show_all_customers():
     """
     This functions is assigned to the show_all_customers_button.
     Passes the relevant table name ('customers') to select_all_from function.
-    Then calls the create_trees function, passing to it the results of the select_all_from function
+    Then calls the create_trees function, passing to it the results of the select_all_from function and the sql_command,
+    in order to show the first 100 rows of the customers table
     """
     column_names_ls = show_table_column_names('customers')
     sql_command = '''SELECT * FROM customers LIMIT 100; '''
@@ -20,7 +21,8 @@ def show_all_vendors():
     """
     This functions is assigned to the show_all_vendors_button.
     Passes the relevant table name ('vendors') to select_all_from function.
-    Then calls the create_trees function, passing to it the results of the select_all_from function
+    Then calls the create_trees function, passing to it the results of the select_all_from function and the sql_command,
+    in order to show the first 100 rows of the vendors table
     """
     column_names_ls = show_table_column_names('vendors')
     sql_command = '''SELECT * FROM vendors LIMIT 100; '''
@@ -30,7 +32,8 @@ def show_all_orders():
     """
     This functions is assigned to the show_all_orders_button.
     Passes the relevant table name ('orders') to select_all_from function.
-    Then calls the create_trees function, passing to it the results of the select_all_from function
+    Then calls the create_trees function, passing to it the results of the select_all_from function and the sql_command,
+    in order to show the first 100 rows of the orders table
     """
     column_names_ls = show_table_column_names('orders')
     sql_command = '''SELECT * FROM orders LIMIT 100; '''
@@ -40,10 +43,11 @@ def show_all_locations():
     """
     This functions is assigned to the show_all_locations_button.
     Passes the relevant table name ('locations') to select_all_from function.
-    Then calls the create_trees function, passing to it the results of the select_all_from function
+    Then calls the create_trees function, passing to it the results of the select_all_from function and the sql_command,
+    in order to show the first 100 rows of the locations table
     """
     column_names_ls = show_table_column_names('locations')
-    sql_command = '''SELECT * FROM orders LIMIT 100; '''
+    sql_command = '''SELECT * FROM locations LIMIT 100; '''
     create_trees(column_names_ls, sql_command)
 
 def show_table_column_names(table_name):
@@ -53,7 +57,8 @@ def show_table_column_names(table_name):
             Parameters:
                     table_name (str): the name of the table. Is given by the relevant button the user pressed.
             Returns:
-                    column_name_ls (list): a list of the column names (str) of the given tables.
+                    column_name_ls (list): a list of the column names (str) of the given tables. This is used in
+                    create_trees function, in order to create the column names of the treeview object on the tkinter application
     '''
     conn = sqlite3.connect('delivery.db')
     cursor = conn.cursor()
@@ -62,23 +67,26 @@ def show_table_column_names(table_name):
     table_info = cursor.fetchall()
     column_name_ls = []
     for row in table_info:
-        column_name_ls.append(row[1]) # the row format is (column number, column name, data type, is a column can be null, default value of the column, if column is a primary key ), thus the item in index 1 is the column name
+        column_name_ls.append(row[1]) # the item in index 1 is the column's name
     conn.close
     return column_name_ls
 
 def create_trees(column_name_ls, sql_command):
     """
     Creates treeview widgets, and depicts them on the GUI.
-    Every time the user presses a select {table_name} button, a new treeview widget is created,
+    Every time the user presses a select table button, a new treeview widget is created,
     while the previous is un grided and deleted.
     Then the treeview is populated by the data of the relevant table.
     The results are limited to the first 100 rows.
+    Also shows the data of the queries the user has typed in the sql_command_entry Entry
         Parameters:
             column_name_ls (list): a list of the column names (str) of the given tables.
+            sql_command (str): the SQL command to be executed
     """
     global my_tree         # the tree was made as a global variable in order to remove the previous generated tkk.Treeview object, otherwise more objects will be created, the newer atop the older ones.
-    global tree_scroll_y
-    global tree_scroll_x
+    global tree_scroll_y   # same as above but for the y axis scroll bar
+    global tree_scroll_x   # same as above but for the x axis scroll bar
+    # try to forget and delete the first instances of my_tree and the scroll bars
     try:
         my_tree.grid_forget()
         tree_scroll_y.grid_forget()
@@ -88,14 +96,14 @@ def create_trees(column_name_ls, sql_command):
         del tree_scroll_x
     except:
         pass
-    my_tree = ttk.Treeview(treeview_frame) # create a treeview object in the treevriew_frame
-    my_tree['columns'] = (column_name_ls) # giving the column names
-    my_tree.column('#0', width=0) # its the first default column (like a treeview index), we set it to minimum width in order not to be visible
-    my_tree.heading('#0', text='', anchor='w')
+    my_tree = ttk.Treeview(treeview_frame) # create a treeview object in the treeview_frame
+    my_tree['columns'] = (column_name_ls) # assign to the column names of the treeview the column names of the relevant database table
+    my_tree.column('#0', width=0) # The tkinter.TreeView has a first default column (identifier #0). its the first column (like a treeview index), we set it to minimum width in order not to be visible
+    # using a for loop to create as many columns in the treeview as the selected database table, and assign the its relevant column names to them
     for column in column_name_ls:
-        my_tree.column(column, stretch=False, width=95) # its column have a fixed width to 95, with no resize even if the widget size is change (see: https://docs.python.org/3/library/tkinter.ttk.html)
+        my_tree.column(column, stretch=False, width=95) # its column have a fixed width to 95, with no resize even if the widget size is changed (see: https://docs.python.org/3/library/tkinter.ttk.html)
         my_tree.heading(column, text=column, anchor='w') # setting column names, and their position (west)
-    my_tree.insert(parent='', index='end', iid=0, text='', values=()) # 
+    my_tree.insert(parent='', index='end', iid=0, text='', values=()) # since there is no parent-child relationship we set parent=''. The values will be inserted at row 123
     # Treeview scrollbar y-axis
     tree_scroll_y = ttk.Scrollbar(treeview_frame, orient='vertical', command=my_tree.yview)
     tree_scroll_y.grid(row=0, column=1, sticky='nse')
@@ -111,6 +119,7 @@ def create_trees(column_name_ls, sql_command):
         conn.commit
         result = cursor.fetchall()
         for row in result:
+            # insert data to the treeview
             my_tree.insert("", tk.END, values=row) # inserting the results of the query to the treeview
         my_tree.grid(row=0, column=0, rowspan=8, columnspan=10)
         conn.close()
@@ -121,7 +130,7 @@ def create_trees(column_name_ls, sql_command):
 def show_all_table_names():
     """
     This function is assigned to the show_table_names button.
-    Shows in the label_screen all the tables of the database.
+    Shows on the label_screen all the tables of the database.
     """
     conn = sqlite3.connect('delivery.db')
     cursor = conn.cursor()
@@ -129,6 +138,7 @@ def show_all_table_names():
         cursor.execute(''' SELECT name FROM sqlite_master WHERE type='table';''')
         conn.commit()
         result = cursor.fetchall()
+        print(result)
         label_screen.config(text= result, font='Helvetica 9 bold', fg='white')
     except Exception as e:
         label_screen.config(text=e, font='Helvetica 9 bold', fg='red')
@@ -139,14 +149,14 @@ def entry_customers():
     Inserts a new customer into the customers table.
     The new customer's details are given through the respective entry labels.
     If no customer_id is given, error message pops to the label_screen.
-    If no proper values for gender, status or verified is given, error appears in the label_screen. (can receive null values)
+    If no proper values for gender, status or verified is given, error appears on the label_screen. (can receive null values)
     """
     conn = sqlite3.connect('delivery.db')
     cursor = conn.cursor()
-    # getting the entries from the user input
+    # getting the entries the user typed
     customer_id = customer_id_entry.get()
     gender = customer_gender_entry.get()
-    gender = gender.upper()
+    gender = gender.upper() # format to uppercase
     if gender == '':    # Blank values are converted to None type since, our database stores and depicts blank values as None.
         gender = None
     status = customer_status_entry.get()
@@ -205,7 +215,7 @@ def create_histogram():
     plt.title('Delivery distance distribution', fontsize=10)
     plt.ylabel('Counts', fontsize=9)
     plt.xlabel('Delivery distance', fontsize=9)
-    canvas = FigureCanvasTkAgg(f, master=plot_frame)  # A tk.DrawingArea.
+    canvas = FigureCanvasTkAgg(f, master=plot_frame)  # setting the tk.DrawingArea
     canvas.draw()
     canvas.get_tk_widget().grid() # row = 2, column = 10, columnspan=3
 
@@ -216,7 +226,7 @@ def mean_item_count():
     '''
     conn = sqlite3.connect('delivery.db')
     df = pd.read_sql_query(''' SELECT item_count FROM orders ''', conn ) # Returns a DataFrame corresponding to the result set of the query string
-    label_screen.config(text="Mean item_count = "+"{:.4f}".format(df['item_count'].mean()),  # calculates the mean and format it to float with 4 decimals
+    label_screen.config(text="Mean item_count = "+"{:.4f}".format(df['item_count'].mean()),  # calculates the mean and format it to float with 4 decimals. By default mean() skip nan values in the calculation
                         font='Helvetica 9 bold', fg='white')
 
 def mean_grand_total():
@@ -226,7 +236,7 @@ def mean_grand_total():
     '''
     conn = sqlite3.connect('delivery.db')
     df = pd.read_sql_query(''' SELECT grand_total FROM orders ''', conn ) # Returns a DataFrame corresponding to the result set of the query string
-    label_screen.config(text="Mean grand_total = "+"{:.4f}".format(df['grand_total'].mean()), # calculates the grand_total and format it to float with 4 decimals
+    label_screen.config(text="Mean grand_total = "+"{:.4f}".format(df['grand_total'].mean()), # calculates the grand_total and format it to float with 4 decimals. By default mean() skip nan values in the calculation
                         font='Helvetica 9 bold', fg='white')
 
 def run_sql_command():
@@ -234,19 +244,20 @@ def run_sql_command():
     This function runs an SQL command, the user has typed into the sql_command_entry entry label.
     If its a 'SELECT' query, the result is shown in the treeview widget.
     Else it returns success message in the label_screen.
-    Cannot handle 'SELECT *' command
+    Note that cannot handle 'SELECT *' command, or depict correctly column names only if few of them are selected
     """
     conn = sqlite3.connect('delivery.db')
     cursor = conn.cursor()
     sql_command = sql_command_entry.get()
     try:
         if sql_command.split()[0].upper() == 'SELECT': # check if the first word is SELECT
-            table_name = sql_command.split()[3] # e.g. SELECT * FROM customers,,, table_name = customers
+            table_name = sql_command.split()[3] # e.g. if there is an SELECT query the element in the index number 3 will be the table name
             try:
                 column_names_ls = show_table_column_names(table_name)
-                create_trees(column_names_ls, sql_command)
+                create_trees(column_names_ls, sql_command) # calling create trees function to show the results of the query
             except Exception as e:
                 label_screen.config(text=e, font='Helvetica 9 bold', fg='red')
+        # in case the query does not start with SELECT statement
         else:
             try:
                 cursor.execute(sql_command)
@@ -264,9 +275,14 @@ def run_sql_command():
 
 ############################## GUI CODE #############################################
 
+# initializing the tkinter application
 root = tk.Tk()
+# setting window length and height
 root.geometry('1600x600')
+# giving a title to the window
 root.title('SQLite gui')
+
+# setting the frames
 
 buttons_frame = tk.LabelFrame(root, text='Tools', padx=8, pady=8)
 buttons_frame.grid(row=0, column=0, rowspan=10, columnspan=1, sticky="WN")
@@ -294,7 +310,8 @@ plot_frame.grid(row=3, column = 11, rowspan=6, columnspan=4, sticky='WN')
 plot_frame.grid_columnconfigure(0, weight=1)
 plot_frame.grid_rowconfigure(0, weight=1)
 
-# the purpose of creating a dummy treeview and canvas is to fill the empty space
+# creating a dummy treeview object
+# the purpose of creating a dummy treeview and canvas is to fill the empty space when the application is initialized
 # Treeview (return table data)
 dummy_columns = [x for x in range(0,7)]
 my_tree = ttk.Treeview(treeview_frame, columns=dummy_columns)
@@ -321,7 +338,7 @@ canvas = tk.Canvas(master=plot_frame, bg='white', height=400, width=400)
 canvas.grid()
 
 
-# SETTING THE LABELS AND ENTRIES
+# setting the labels and entries
 
 sql_command_entry = tk.Entry(sql_entry_and_screen_frame, width=70, selectborderwidth=5)
 sql_command_entry.grid(row=0, column=3)
@@ -349,7 +366,7 @@ customer_verified_label.grid(row=9, column=4, padx=0)
 customer_verified_entry = tk.Entry(down_frame, width=20)
 customer_verified_entry.grid(row=10, column=4, padx=0)
 
-# SETTING BUTTONs
+# setting the buttons
 
 sql_command_run_button = tk.Button(sql_entry_and_screen_frame, text='Run command', command=run_sql_command, width=20)
 sql_command_run_button.grid(row=0, column=2)
@@ -385,7 +402,7 @@ quit = tk.Button(buttons_frame, text="QUIT", fg="red", command=root.quit, width=
 quit.grid(row=10, column=0)
 
 
-# GUI MAIN LOOP
+# gui main loop
 root.mainloop()
 root.destroy()
 

@@ -1,8 +1,25 @@
-from os import stat_result
 import sqlite3
 
-# for all tables no index is stated, since by default SQLite creates rowid
+'''
+For all tables no index is stated, since by default SQLite creates rowid.
 
+Furthermore SQLite uses a more general dynamic type system.
+According to SQLite version 3 documentation : "In SQLite, the
+datatype of a value is associated with the value itself, not 
+with its container.Also SQLite uses data affinities, the type 
+affinity of a column is the recommended type for data stored in that column."
+That means that the type is recommended, not required. Any column can still store any type of data.
+However the SQLite engine will try to convert it to the affinity type.
+So the affinity type supported by SQLite v3 are going to be used. :
+
+-TEXT
+-NUMERIC
+-INTEGER
+-REAL
+-BLOB
+
+(see: https://www.sqlite.org/datatype3.html).
+'''
 sql_command_CREATE_CUSTOMERS = '''
 CREATE TABLE customers (
     customer_id TEXT NOT NULL,
@@ -61,19 +78,23 @@ CREATE TABLE orders (
 
 def create_table(sql_command, DATABASE_NAME = 'delivery.db'):
     """
-    This function is meant to create a database table
+    This function creates a database table to a database (to delivery.db by default)
     Parameters:
         sql_command (str): The sql command needed to create an SQLite table
         DATABASE_NAME (str): the name of the database the table to be created (default 'delivery.db')
     """
+    # connect to the database
     conn = sqlite3.connect(DATABASE_NAME)
+    # create the cursor
     cursor = conn.cursor()
+    # execute the sql_command
     cursor.execute(sql_command)
     # commit our command
     conn.commit()
     # close our connection
     conn.close()
 
+# UNCOMMENT THE CODE BELOW TO CREATE THE DATABASE'S TABLES
 # create_table(sql_command_CREATE_CUSTOMERS)
 # create_table(sql_command_CREATE_LOCATIONS)
 # create_table(sql_command_CREATE_VENDORS)
