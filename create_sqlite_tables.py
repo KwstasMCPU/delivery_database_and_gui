@@ -49,7 +49,6 @@ CREATE TABLE vendors (
     serving_distance REAL,
     rank REAL,
     vendor_rating REAL,
-    vendor_tag_name TEXT,
     opening_time TEXT,
     closing_time TEXT,
     PRIMARY KEY(vendor_id)
