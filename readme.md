@@ -1,7 +1,8 @@
-The project was coded in python 3.8.6
+This project was created as a coursework project of my MSc in Data Science and Business Analytics
 
 All dependencies (libraries used) that have to be installed for project to run properly are stored in requirements.txt file.
 To install all required dependencies run command: $ pip install -r requirements.txt
+The project was coded in python 3.8.6
 
 ====================================
 
